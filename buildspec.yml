@@ -5,20 +5,11 @@ phases:
     runtime-versions:
       python: 3.12
     commands:
-      - echo Installing dependencies...
       - pip install -r requirements.txt
-  
-  pre_build:
-    commands:
-      - echo Running pre-build steps...
-  
+
   build:
     commands:
-      - echo Building project...
-  
-  post_build:
-    commands:
-      - echo Build complete. You can now deploy your app.
+      - python manage.py collectstatic --noinput
 
 artifacts:
   files:
