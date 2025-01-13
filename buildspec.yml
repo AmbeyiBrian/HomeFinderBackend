@@ -3,24 +3,22 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      python: 3.12
+      python: 3.9
+    commands:
+      - cd HomeFinderBackend
+      - pip install -r requirements.txt
   pre_build:
     commands:
-      - cd HomeFinderBackend  # Navigate to the Django backend directory
-      - pip install -r requirements.txt
+      - python manage.py collectstatic --noinput
+      - python manage.py makemigrations
+      - python manage.py migrate
   build:
     commands:
-      - echo "Running tests if any"
-      # Add any build commands for your Django app
+      - echo "Build phase completed."
   post_build:
     commands:
-      - echo "Creating deployment package"
-      # Create the Elastic Beanstalk deployment package
-      - zip -r ../deployment.zip .
-      - cd ..
-      - echo "Moving deployment package to root"
-
+      - echo "Deployment complete."
 artifacts:
   files:
-    - deployment.zip
-  name: deployment
+    - '**/*'
+  discard-paths: no
