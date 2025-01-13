@@ -5,6 +5,8 @@ phases:
     runtime-versions:
       python: 3.12
     commands:
+      - echo "Listing contents of HomeFinderBackend"
+      - ls -al HomeFinderBackend
       - cd HomeFinderBackend
       - pip install -r requirements.txt
   pre_build:
