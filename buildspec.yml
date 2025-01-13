@@ -5,22 +5,18 @@ phases:
     runtime-versions:
       python: 3.12
     commands:
-      - echo "Listing contents of HomeFinderBackend"
-      - ls -al HomeFinderBackend
-      - cd HomeFinderBackend
+      - echo Installing dependencies...
       - pip install -r requirements.txt
   pre_build:
     commands:
-      - python manage.py collectstatic --noinput
-      - python manage.py makemigrations
-      - python manage.py migrate
+      - echo Running pre-build steps...
   build:
     commands:
-      - echo "Build phase completed."
+      - echo Building project...
   post_build:
     commands:
-      - echo "Deployment complete."
+      - echo Build complete. You can now deploy your app.
 artifacts:
   files:
     - '**/*'
-  discard-paths: no
+  discard-paths: yes
