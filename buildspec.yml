@@ -1,17 +1,26 @@
-option_settings:
-  aws:elasticbeanstalk:container:python:
-    WSGIPath: HomeFinderBackend.wsgi:application
-  aws:elasticbeanstalk:environment:proxy:staticfiles:
-    /static: static
-  aws:elasticbeanstalk:application:environment:
-    DJANGO_SETTINGS_MODULE: HomeFinderBackend.settings
-    PYTHONPATH: /var/app/current
-  aws:elasticbeanstalk:environment:proxy:
-    ProxyServer: nginx
+version: 0.2
 
-container_commands:
-  01_migrate:
-    command: "source /var/app/venv/*/bin/activate && python manage.py migrate --noinput"
-    leader_only: true
-  02_collectstatic:
-    command: "source /var/app/venv/*/bin/activate && python manage.py collectstatic --noinput"
+phases:
+  install:
+    runtime-versions:
+      python: 3.12
+    commands:
+      - echo Installing dependencies...
+      - pip install -r requirements.txt
+  
+  pre_build:
+    commands:
+      - echo Running pre-build steps...
+  
+  build:
+    commands:
+      - echo Building project...
+  
+  post_build:
+    commands:
+      - echo Build complete. You can now deploy your app.
+
+artifacts:
+  files:
+    - '**/*'
+  discard-paths: no
