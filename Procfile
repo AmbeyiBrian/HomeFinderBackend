@@ -1,0 +1,1 @@
+web: gunicorn --bind :8000 your_project_name.wsgi:application
