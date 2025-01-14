@@ -5,6 +5,8 @@ phases:
     commands:
       - pip install --upgrade pip
       - echo "Using pre-installed Python 3.12 runtime"
+      - pyenv install 3.12.0
+      - pyenv global 3.12.0
       - python --version
 
   pre_build:
