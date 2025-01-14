@@ -5,6 +5,8 @@ phases:
     commands:
       - echo "Installing system dependencies..."
       - yum install -y gcc openssl-devel bzip2-devel libffi-devel zlib-devel make
+      - echo "Removing existing pyenv directory if it exists..."
+      - rm -rf /root/.pyenv
       - echo "Installing pyenv..."
       - curl https://pyenv.run | bash
       - export PATH="$HOME/.pyenv/bin:$PATH"
