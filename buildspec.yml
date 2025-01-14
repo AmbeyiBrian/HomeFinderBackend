@@ -7,14 +7,12 @@ phases:
     commands:
       - echo "Installing dependencies..."
       - yum install -y gcc openssl-devel bzip2-devel libffi-devel zlib-devel
-      - echo "Installing custom Python version 3.12..."
-      - pyenv install 3.12
-      - pyenv global 3.12
-      - python --version
+      - echo "Installing Python packages..."
       - pip install -r requirements.txt
 
   build:
     commands:
+      - echo "Running collectstatic..."
       - python manage.py collectstatic --noinput
 
 artifacts:
