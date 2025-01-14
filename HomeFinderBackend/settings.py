@@ -18,6 +18,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = os.getenv('CORS_ORIGINS', '').split(',')
+
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
