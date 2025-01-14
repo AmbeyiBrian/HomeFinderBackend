@@ -3,6 +3,7 @@ version: 0.2
 phases:
   install:
     commands:
+      - pip install --upgrade pip
       - echo "Using pre-installed Python 3.12 runtime"
       - python --version
 
