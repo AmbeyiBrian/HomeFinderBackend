@@ -3,6 +3,8 @@ version: 0.2
 phases:
   install:
     commands:
+      # Install OpenSSL and development libraries required to build Python with SSL support
+      - yum install -y openssl-devel
       - pip install --upgrade pip
       - echo "Using pre-installed Python 3.12 runtime"
       - pyenv install 3.12.0
