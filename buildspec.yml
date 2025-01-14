@@ -13,6 +13,10 @@ phases:
       - eval "$(pyenv init --path)"
       - eval "$(pyenv init -)"
       - eval "$(pyenv virtualenv-init -)"
+      - echo "Setting environment variables for OpenSSL..."
+      - export LDFLAGS="-L/usr/lib64"
+      - export CPPFLAGS="-I/usr/include"
+      - export PKG_CONFIG_PATH="/usr/lib64/pkgconfig"
       - echo "Installing Python 3.12..."
       - pyenv install 3.12.0
       - pyenv global 3.12.0
