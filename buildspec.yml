@@ -1,12 +1,15 @@
 version: 0.2
 
 phases:
+  pre_build:
+    commands:
+      - echo "Installing system dependencies..."
+      - yum install -y gcc openssl-devel bzip2-devel libffi-devel zlib-devel
+
   install:
     runtime-versions:
       python: 3.12
     commands:
-      - echo "Installing dependencies..."
-      - yum install -y gcc openssl-devel bzip2-devel libffi-devel zlib-devel
       - echo "Installing Python packages..."
       - pip install -r requirements.txt
 
