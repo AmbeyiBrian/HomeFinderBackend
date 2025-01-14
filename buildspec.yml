@@ -5,6 +5,12 @@ phases:
     runtime-versions:
       python: 3.12
     commands:
+      - echo "Installing dependencies..."
+      - yum install -y gcc openssl-devel bzip2-devel libffi-devel zlib-devel
+      - echo "Installing custom Python version 3.12..."
+      - pyenv install 3.12
+      - pyenv global 3.12
+      - python --version
       - pip install -r requirements.txt
 
   build:
