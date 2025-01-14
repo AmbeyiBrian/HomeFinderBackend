@@ -3,26 +3,8 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Installing system dependencies..."
-      - yum install -y gcc make zlib-devel bzip2 bzip2-devel readline-devel xz-devel libffi-devel openssl openssl-devel
-      - echo "Removing existing pyenv directory if it exists..."
-      - rm -rf /root/.pyenv
-      - echo "Installing pyenv..."
-      - curl https://pyenv.run | bash
-      - export PATH="$HOME/.pyenv/bin:$PATH"
-      - eval "$(pyenv init --path)"
-      - eval "$(pyenv init -)"
-      - eval "$(pyenv virtualenv-init -)"
-      - echo "Setting environment variables for OpenSSL..."
-      - export LDFLAGS="-L/usr/lib64"
-      - export CPPFLAGS="-I/usr/include"
-      - export PKG_CONFIG_PATH="/usr/lib64/pkgconfig"
-      - echo "Verifying OpenSSL version..."
-      - openssl version
-      - echo "Installing Python 3.12..."
-      - pyenv install 3.12.0
-      - pyenv global 3.12.0
-      - echo "Python 3.12 installed."
+      - echo "Using pre-installed Python 3.12 runtime"
+      - python --version
 
   pre_build:
     commands:
