@@ -1,1 +1,1 @@
-web: gunicorn --bind 0.0.0.0:8000 --workers 3 HomeFinderBackend.wsgi:application
+web: gunicorn HomeFinderBackend.wsgi:application --bind 0.0.0.0:8000
