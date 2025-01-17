@@ -29,7 +29,7 @@ phases:
       # Create a temporary settings file for tests
       - |
         cat > test_settings.py << EOL
-        from your_project.settings import *
+        from HomeFinderBackend.settings import *
         
         DATABASES = {
             'default': {

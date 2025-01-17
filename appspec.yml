@@ -77,7 +77,7 @@ rm -f /etc/nginx/sites-enabled/default
 # Configure Supervisor
 cat > /etc/supervisor/conf.d/django-app.conf <<EOL
 [program:django-app]
-command=/var/www/django-app/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 your_project.wsgi:application
+command=/var/www/django-app/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 HomeFinderBackend.wsgi:application
 directory=/var/www/django-app
 user=www-data
 autostart=true
