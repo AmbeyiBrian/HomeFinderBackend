@@ -22,6 +22,8 @@ hooks:
       timeout: 300
       runas: root
 
+# Set execute permissions for scripts
+chmod +x /var/www/django-app/scripts/*.sh
 # scripts/before_install.sh
 #!/bin/bash
 # Create application directory
