@@ -3,22 +3,37 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      python: 3.12
+      python: 3.9  # We'll use the system Python first to set up our environment
     commands:
-      - pip install --upgrade pip
-      - pip install -r requirements.txt
+      # Install dependencies required for Python 3.12
+      - yum update -y
+      - yum groupinstall -y "Development Tools"
+      - yum install -y openssl-devel bzip2-devel libffi-devel wget
+
+      # Download and install Python 3.12
+      - wget https://www.python.org/ftp/python/3.12.1/Python-3.12.1.tgz
+      - tar xzf Python-3.12.1.tgz
+      - cd Python-3.12.1
+      - ./configure --enable-optimizations
+      - make altinstall
+      - cd ..
+      - rm -rf Python-3.12.1 Python-3.12.1.tgz
+
+      # Update pip
+      - python3.12 -m pip install --upgrade pip
 
   pre_build:
     commands:
+      - python3.12 -m pip install -r requirements.txt
       - echo "Running tests"
-      - python manage.py test
+      - python3.12 manage.py test
 
   build:
     commands:
       - echo "Running collectstatic"
-      - python manage.py collectstatic --noinput
+      - python3.12 manage.py collectstatic --noinput
       - echo "Running migrations check"
-      - python manage.py check --deploy
+      - python3.12 manage.py check --deploy
 
   post_build:
     commands:
