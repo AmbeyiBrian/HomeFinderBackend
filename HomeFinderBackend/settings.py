@@ -17,7 +17,17 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 # CORS_ALLOW_ALL_ORIGINS = True
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ORIGINS', '').split(',')
+CORS_ALLOWED_ORIGINS = [
+    "https://100.26.178.134",
+    "https://homefinder-env.eba-e72ydma9.us-east-1.elasticbeanstalk.com"
+]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://\w+\.your-domain\.com$",
+]
+
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_METHODS = [
     'DELETE',
