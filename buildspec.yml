@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.12
+    commands:
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+
+  pre_build:
+    commands:
+      - echo "Running tests"
+      - python manage.py test
+
+  build:
+    commands:
+      - echo "Running collectstatic"
+      - python manage.py collectstatic --noinput
+      - echo "Running migrations check"
+      - python manage.py check --deploy
+
+  post_build:
+    commands:
+      - echo "Build completed"
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: '.'
