@@ -8,7 +8,7 @@ echo "Starting before_install.sh at $(date)"
 # Create application directory
 echo "Creating application directory..."
 mkdir -p /var/www/django-app
-mkdir -p /var/www/django-app/static
+mkdir -p /var/www/django-app/staticfiles
 mkdir -p /var/www/django-app/media
 mkdir -p /var/log/django-app
 

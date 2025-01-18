@@ -31,8 +31,8 @@ server {
     listen 80;
     server_name _;
 
-    location /static/ {
-        alias /var/www/django-app/static/;
+    location /staticfiles/ {
+        alias /var/www/django-app/staticfiles/;
     }
 
     location /media/ {
