@@ -95,7 +95,7 @@ WSGI_APPLICATION = 'HomeFinderBackend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'homefinder-db',
+        'NAME': 'homefinder',
         'USER': 'postgres',
         'PASSWORD': 'HomeFinder1234',
         'HOST': 'homefinder.c4ukz2wlcu6n.us-east-1.rds.amazonaws.com',
