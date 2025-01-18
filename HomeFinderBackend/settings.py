@@ -98,7 +98,7 @@ DATABASES = {
         'NAME': 'homefinder-db',
         'USER': 'postgres',
         'PASSWORD': 'HomeFinder1234',
-        'HOST': 'django-db-development.c4ukz2wlcu6n.us-east-1.rds.amazonaws.com',
+        'HOST': 'homefinder.c4ukz2wlcu6n.us-east-1.rds.amazonaws.com',
         'PORT':'5432',
 
     }
