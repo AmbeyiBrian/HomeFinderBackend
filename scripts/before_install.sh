@@ -19,6 +19,6 @@ chmod -R 755 /var/www/django-app
 # Install system dependencies
 echo "Installing system dependencies..."
 apt-get update
-apt-get install -y python3.12 python3.12-venv python3-pip nginx supervisor
+apt-get install -y python3.10 python3.10-venv python3-pip nginx supervisor
 
 echo "before_install.sh completed at $(date)"

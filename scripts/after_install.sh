@@ -9,7 +9,7 @@ cd /var/www/django-app
 
 # Create and activate virtual environment
 echo "Setting up Python virtual environment..."
-python3.12 -m venv venv
+python3.10 -m venv venv
 source venv/bin/activate
 
 # Install Python dependencies

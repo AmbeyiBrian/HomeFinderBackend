@@ -5,26 +5,26 @@ phases:
     runtime-versions:
       python: 3.9
     commands:
-      # Install dependencies required for Python 3.12
+      # Install dependencies required for Python 3.10
       - yum update -y
       - yum groupinstall -y "Development Tools"
       - yum install -y openssl-devel bzip2-devel libffi-devel wget sqlite-devel
 
-      # Download and install Python 3.12
-      - wget https://www.python.org/ftp/python/3.12.1/Python-3.12.1.tgz
-      - tar xzf Python-3.12.1.tgz
-      - cd Python-3.12.1
+      # Download and install Python 3.10
+      - wget https://www.python.org/ftp/python/3.10.1/Python-3.10.1.tgz
+      - tar xzf Python-3.10.1.tgz
+      - cd Python-3.10.1
       - ./configure --enable-optimizations
       - make altinstall
       - cd ..
-      - rm -rf Python-3.12.1 Python-3.12.1.tgz
+      - rm -rf Python-3.10.1 Python-3.10.1.tgz
 
       # Update pip
-      - python3.12 -m pip install --upgrade pip
+      - python3.10 -m pip install --upgrade pip
 
   pre_build:
     commands:
-      - python3.12 -m pip install -r requirements.txt
+      - python3.10 -m pip install -r requirements.txt
 
       # Create a temporary settings file for tests
       - |
@@ -48,16 +48,16 @@ phases:
       - export DJANGO_SETTINGS_MODULE=test_settings
 
       # Run migrations and tests
-      - python3.12 manage.py migrate --noinput
+      - python3.10 manage.py migrate --noinput
       - echo "Running tests"
-      - python3.12 manage.py test
+      - python3.10 manage.py test
 
   build:
     commands:
       - echo "Running collectstatic"
-      - python3.12 manage.py collectstatic --noinput
+      - python3.10 manage.py collectstatic --noinput
       - echo "Running migrations check"
-      - python3.12 manage.py check --deploy
+      - python3.10 manage.py check --deploy
 
   post_build:
     commands:
