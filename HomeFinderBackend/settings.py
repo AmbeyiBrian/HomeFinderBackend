@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'q3RrMGfh1m2J64wVptGx9WzshlKd8YVyb9TjP9Kc3wJzKgfJ5q'
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = ['*']
 
 # CORS_ALLOW_ALL_ORIGINS = True
 
