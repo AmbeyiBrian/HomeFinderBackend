@@ -10,17 +10,14 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'q3RrMGfh1m2J64wVptGx9WzshlKd8YVyb9TjP9Kc3wJzKgfJ5q'
-DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
 # CORS_ALLOW_ALL_ORIGINS = True
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = [
-    "https://100.26.178.134",
-    "https://homefinder-env.eba-e72ydma9.us-east-1.elasticbeanstalk.com"
-]
+CORS_ALLOWED_ORIGINS = ["*"]
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://\w+\.your-domain\.com$",
