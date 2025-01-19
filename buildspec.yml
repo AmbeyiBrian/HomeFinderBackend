@@ -1,5 +1,11 @@
 version: 0.2
 
+env:
+  variables:
+    DJANGO_SECRET_KEY: q3RrMGfh1m2J64wVptGx9WzshlKd8YVyb9TjP9Kc3wJzKgfJ5q
+    AWS_STORAGE_BUCKET_NAME: django-app-storage
+    DEFAULT_FILE_STORAGE: storages.backends.s3boto3.S3Boto3Storage
+
 phases:
   install:
     runtime-versions:
