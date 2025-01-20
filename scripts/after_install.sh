@@ -29,7 +29,7 @@ echo "Configuring Nginx..."
 cat > /etc/nginx/sites-available/django-app <<EOL
 server {
     listen 80;
-    server_name _;
+    server_name _;  # Changed from * to _ for default server
 
     location /static/ {
         alias /var/www/django-app/staticfiles/;
@@ -44,6 +44,7 @@ server {
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 }
 EOL
@@ -63,7 +64,12 @@ autostart=true
 autorestart=true
 stderr_logfile=/var/log/django-app/django-app.err.log
 stdout_logfile=/var/log/django-app/django-app.out.log
+environment=DJANGO_SETTINGS_MODULE="HomeFinderBackend.settings"
 EOL
+
+# Create log directory if it doesn't exist
+mkdir -p /var/log/django-app
+chown -R ubuntu:ubuntu /var/log/django-app
 
 # Create environment file
 echo "Setting up environment file..."
@@ -73,5 +79,15 @@ ALLOWED_HOSTS=*
 DATABASE_URL=postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}
 SECRET_KEY=${DJANGO_SECRET_KEY}
 EOL
+
+# Set proper permissions
+chown -R ubuntu:ubuntu /var/www/django-app
+
+# Reload Supervisor and Nginx
+echo "Reloading services..."
+supervisorctl reread
+supervisorctl update
+supervisorctl restart django-app
+nginx -t && systemctl restart nginx
 
 echo "after_install.sh completed at $(date)"
