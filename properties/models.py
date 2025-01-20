@@ -53,8 +53,14 @@ class PropertyImage(models.Model):
     image = models.ImageField(upload_to='property_images/')
     is_primary = models.BooleanField(default=False)
 
-    def __str__(self):
-        return f"Image for {self.property.title}"
+    def save(self, *args, **kwargs):
+        print(f"Attempting to save image: {self.image}")
+        try:
+            super().save(*args, **kwargs)
+            print(f"Image saved successfully. URL: {self.image.url}")
+        except Exception as e:
+            print(f"Error saving image: {str(e)}")
+            raise
 
 class Favorite(models.Model):
     user = models.ForeignKey(CustomUser, related_name='favorites', on_delete=models.CASCADE)
