@@ -150,7 +150,7 @@ AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazo
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',  # 24 hours of cache
 }
-
+AWS_S3_ADDRESSING_STYLE = "path"
 AWS_QUERYSTRING_AUTH = False  # This disables query parameter authentication
 
 # Media Files Configuration
