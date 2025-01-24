@@ -3,6 +3,7 @@ from storages.backends.s3boto3 import S3Boto3Storage
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from users.models import CustomUser
+import os
 
 
 class PropertyType(models.Model):
