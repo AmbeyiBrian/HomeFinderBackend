@@ -49,26 +49,17 @@ class Property(models.Model):
     def __str__(self):
         return self.title
 
-
 class PropertyImage(models.Model):
     property = models.ForeignKey(Property, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(
         upload_to='property_images/',
-        storage=S3Boto3Storage(
-            bucket=os.getenv('AWS_STORAGE_BUCKET_NAME', 'django-app-storage'),
-            location='property_images/'
-        )
+        storage=None
     )
     is_primary = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if self.image:
             try:
-                # Ensure file is saved before model save
-                self.image.name = default_storage.save(
-                    f'property_images/{self.image.name}',
-                    self.image
-                )
                 super().save(*args, **kwargs)
                 print(f"Image saved successfully. URL: {self.image.url}")
             except Exception as e:
