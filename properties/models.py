@@ -1,4 +1,5 @@
-# properties/models.py
+from django.core.files.storage import default_storage
+from storages.backends.s3boto3 import S3Boto3Storage
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from users.models import CustomUser
@@ -50,17 +51,28 @@ class Property(models.Model):
 
 class PropertyImage(models.Model):
     property = models.ForeignKey(Property, related_name='images', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='property_images/', storage=None)
+    image = models.ImageField(
+        upload_to='property_images/',
+        storage=S3Boto3Storage(
+            bucket=os.getenv('AWS_STORAGE_BUCKET_NAME', 'django-app-storage'),
+            location='property_images/'
+        )
+    )
     is_primary = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        print(f"Attempting to save image: {self.image}")
-        try:
-            super().save(*args, **kwargs)
-            print(f"Image saved successfully. URL: {self.image.url}")
-        except Exception as e:
-            print(f"Error saving image: {str(e)}")
-            raise
+        if self.image:
+            try:
+                # Ensure file is saved before model save
+                self.image.name = default_storage.save(
+                    f'property_images/{self.image.name}',
+                    self.image
+                )
+                super().save(*args, **kwargs)
+                print(f"Image saved successfully. URL: {self.image.url}")
+            except Exception as e:
+                print(f"Error saving image: {str(e)}")
+                raise
 
 class Favorite(models.Model):
     user = models.ForeignKey(CustomUser, related_name='favorites', on_delete=models.CASCADE)
