@@ -8,15 +8,10 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'q3RrMGfh1m2J64wVptGx9WzshlKd8YVyb9TjP9Kc3wJzKgfJ5q'
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
-
-# CORS_ALLOW_ALL_ORIGINS = True
-
-# CORS Configuration
-CORS_ALLOW_ALL_ORIGINS = True
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'  # Ensure boolean
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')  # Split into a list
+CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', 'False') == 'True'
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://\w+\.your-domain\.com$",
@@ -89,11 +84,11 @@ WSGI_APPLICATION = 'HomeFinderBackend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'homefinder',
-        'USER': 'postgres',
-        'PASSWORD': 'HomeFinder1234',
-        'HOST': 'homefinder.c4ukz2wlcu6n.us-east-1.rds.amazonaws.com',
-        'PORT': '5432',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
 
     }
 }
@@ -137,26 +132,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-LOGGING = {
-    'version': 1,
-    'handlers': {'console': {'class': 'logging.StreamHandler'}},
-    'loggers': {'botocore': {'handlers': ['console'], 'level': 'DEBUG'}}
-}
-
-# settings.py
-from storages.backends.s3boto3 import S3Boto3Storage
-
-class PublicMediaStorage(S3Boto3Storage):
-    location = 'property_images'
-    default_acl = 'public-read'  # 👈 Enforce ACL
-    file_overwrite = False
-
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
 # Ensure these are set correctly
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-AWS_S3_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_S3_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = 'django-app-storage'
 AWS_S3_REGION_NAME = 'us-east-1'
 AWS_S3_FILE_OVERWRITE = False

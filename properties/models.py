@@ -5,6 +5,10 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from users.models import CustomUser
 import os
 
+from django.core.exceptions import ValidationError
+import logging
+
+logger = logging.getLogger(__name__)
 
 class PropertyType(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -50,21 +54,59 @@ class Property(models.Model):
         return self.title
 
 class PropertyImage(models.Model):
-    property = models.ForeignKey(Property, related_name='images', on_delete=models.CASCADE)
+    property = models.ForeignKey(
+        'Property',
+        related_name='images',
+        on_delete=models.CASCADE
+    )
     image = models.ImageField(
-        upload_to='property_images/',
-        storage=None
+        upload_to='property_images/'
     )
     is_primary = models.BooleanField(default=False)
 
+    def clean(self):
+        """
+        Validate that only one primary image exists per property
+        """
+        if self.is_primary:
+            qs = PropertyImage.objects.filter(
+                property=self.property,
+                is_primary=True
+            )
+            if self.pk:  # Exclude current instance if updating
+                qs = qs.exclude(pk=self.pk)
+            if qs.exists():
+                raise ValidationError("A primary image already exists for this property")
+
     def save(self, *args, **kwargs):
-        if self.image:
-            try:
+        """
+        Custom save method with transaction handling and logging
+        """
+        from django.db import transaction
+
+        try:
+            with transaction.atomic():
+                # Ensure validation happens before save
+                self.full_clean()
+
+                # Call original save method
                 super().save(*args, **kwargs)
-                print(f"Image saved successfully. URL: {self.image.url}")
-            except Exception as e:
-                print(f"Error saving image: {str(e)}")
-                raise
+
+                # Log successful save
+                logger.info(f"Image saved successfully. Path: {self.image.name}")
+
+                # If marked as primary, update other images
+                if self.is_primary:
+                    PropertyImage.objects.filter(
+                        property=self.property
+                    ).exclude(pk=self.pk).update(is_primary=False)
+
+        except Exception as e:
+            logger.error(f"Error saving image: {str(e)}", exc_info=True)
+            raise  # Re-raise exception after logging
+
+    def __str__(self):
+        return f"Image for {self.property} (Primary: {self.is_primary})"
 
 class Favorite(models.Model):
     user = models.ForeignKey(CustomUser, related_name='favorites', on_delete=models.CASCADE)
