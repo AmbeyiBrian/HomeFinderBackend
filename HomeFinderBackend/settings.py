@@ -8,7 +8,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = 'q3RrMGfh1m2J64wVptGx9WzshlKd8YVyb9TjP9Kc3wJzKgfJ5q'
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'  # Ensure boolean
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')  # Split into a list
 CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', 'False') == 'True'
@@ -84,11 +84,11 @@ WSGI_APPLICATION = 'HomeFinderBackend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'NAME': 'homefinderdb',
+        'USER': 'postgres',
+        'PASSWORD': 'HomeFinder1234',
+        'HOST': 'homefinder-database.c4ukz2wlcu6n.us-east-1.rds.amazonaws.com',
+        'PORT': 5432,
 
     }
 }
