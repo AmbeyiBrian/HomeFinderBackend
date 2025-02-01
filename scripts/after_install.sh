@@ -35,11 +35,11 @@ sudo -u ubuntu pip install -r requirements.txt
 
 # Run migrations
 echo "Running database migrations..."
-sudo -u ubuntu python manage.py migrate --noinput
+sudo -u ubuntu python3 manage.py migrate --noinput
 
 # Collect static files
 echo "Collecting static files..."
-sudo -u ubuntu python manage.py collectstatic --noinput
+sudo -u ubuntu python3 manage.py collectstatic --noinput
 
 # Create necessary directories
 echo "Creating necessary directories..."
