@@ -16,7 +16,7 @@ fi
 # Update package list and install dependencies
 echo "Updating package list and installing dependencies..."
 apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get install -y python3.10-venv nginx supervisor certbot python3-certbot-nginx
+DEBIAN_FRONTEND=noninteractive apt-get install -y python3.10-venv nginx supervisor certbot python3-certbot-nginx postgresql-client
 
 cd /var/www/django-app || exit 1
 
@@ -32,6 +32,46 @@ source venv/bin/activate
 # Install Python dependencies
 echo "Installing Python dependencies..."
 sudo -u ubuntu pip install -r requirements.txt
+
+# Create environment file first
+echo "Setting up environment file..."
+cat > /var/www/django-app/.env <<EOL
+DEBUG=False
+ALLOWED_HOSTS=api.homefinder254.com,localhost,127.0.0.1
+DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+SECRET_KEY=${DJANGO_SECRET_KEY}
+CSRF_TRUSTED_ORIGINS=https://api.homefinder254.com
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+EOL
+
+# Set proper permissions for environment file
+chmod 600 /var/www/django-app/.env
+chown ubuntu:ubuntu /var/www/django-app/.env
+
+# Check database connectivity before proceeding
+echo "Checking database connectivity..."
+sudo -u ubuntu python3 << EOF
+import psycopg2
+import os
+from urllib.parse import urlparse
+
+db_url = f"postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+try:
+    connection = psycopg2.connect(
+        database="${DB_NAME}",
+        user="${DB_USER}",
+        password="${DB_PASSWORD}",
+        host="${DB_HOST}",
+        port="${DB_PORT}"
+    )
+    print("Database connection successful!")
+    connection.close()
+except Exception as e:
+    print("Database connection failed:", str(e))
+    exit(1)
+EOF
 
 # Run migrations
 echo "Running database migrations..."
@@ -90,23 +130,6 @@ stderr_logfile=/var/log/django-app/django-app.err.log
 stdout_logfile=/var/log/django-app/django-app.out.log
 environment=DJANGO_SETTINGS_MODULE="HomeFinderBackend.settings"
 EOL
-
-# Create environment file
-echo "Setting up environment file..."
-cat > /var/www/django-app/.env <<EOL
-DEBUG=False
-ALLOWED_HOSTS=api.homefinder254.com,localhost,127.0.0.1
-DATABASE_URL=postgres://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}
-SECRET_KEY=${DJANGO_SECRET_KEY}
-CSRF_TRUSTED_ORIGINS=https://api.homefinder254.com
-SECURE_SSL_REDIRECT=True
-SESSION_COOKIE_SECURE=True
-CSRF_COOKIE_SECURE=True
-EOL
-
-# Set proper permissions for environment file
-chmod 600 /var/www/django-app/.env
-chown ubuntu:ubuntu /var/www/django-app/.env
 
 # Ensure supervisor is running
 echo "Starting supervisor..."
