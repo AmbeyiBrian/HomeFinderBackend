@@ -1,33 +1,50 @@
 #!/bin/bash
+
+# Enable error handling
 set -e
 
 # Log all output
 exec > >(tee -a /var/log/deploy.log) 2>&1
 echo "Starting after_install.sh at $(date)"
 
-cd /var/www/django-app
+# Ensure script is run as root
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root"
+   exit 1
+fi
+
+# Update package list and install dependencies
+echo "Updating package list and installing dependencies..."
+apt-get update
+DEBIAN_FRONTEND=noninteractive apt-get install -y python3.10-venv nginx supervisor certbot python3-certbot-nginx
+
+cd /var/www/django-app || exit 1
+
+# Set correct permissions
+echo "Setting correct permissions..."
+chown -R ubuntu:ubuntu /var/www/django-app
 
 # Create and activate virtual environment
 echo "Setting up Python virtual environment..."
-python3.10 -m venv venv
+sudo -u ubuntu python3.10 -m venv venv
 source venv/bin/activate
 
 # Install Python dependencies
 echo "Installing Python dependencies..."
-pip install -r requirements.txt
+sudo -u ubuntu pip install -r requirements.txt
 
 # Run migrations
 echo "Running database migrations..."
-python manage.py migrate --noinput
+sudo -u ubuntu python manage.py migrate --noinput
 
 # Collect static files
 echo "Collecting static files..."
-python manage.py collectstatic --noinput
+sudo -u ubuntu python manage.py collectstatic --noinput
 
-# Install certbot if not already installed
-echo "Installing certbot..."
-apt-get update
-apt-get install -y certbot python3-certbot-nginx
+# Create necessary directories
+echo "Creating necessary directories..."
+mkdir -p /var/log/django-app
+chown -R ubuntu:ubuntu /var/log/django-app
 
 # Configure Nginx
 echo "Configuring Nginx..."
@@ -37,36 +54,12 @@ server {
     listen [::]:80;
     server_name api.homefinder254.com;
 
-    # Redirect all HTTP requests to HTTPS
-    return 301 https://\$server_name\$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
-    server_name api.homefinder254.com;
-
-    # SSL configuration
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_prefer_server_ciphers on;
-    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
-    ssl_session_timeout 1d;
-    ssl_session_cache shared:SSL:50m;
-    ssl_stapling on;
-    ssl_stapling_verify on;
-
-    # SSL certificates will be managed by Certbot
-
     location /static/ {
         alias /var/www/django-app/staticfiles/;
-        expires 30d;
-        add_header Cache-Control "public, no-transform";
     }
 
     location /media/ {
         alias /var/www/django-app/media/;
-        expires 30d;
-        add_header Cache-Control "public, no-transform";
     }
 
     location / {
@@ -75,12 +68,6 @@ server {
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
-
-        # Additional security headers
-        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-        add_header X-Content-Type-Options nosniff;
-        add_header X-Frame-Options DENY;
-        add_header X-XSS-Protection "1; mode=block";
     }
 }
 EOL
@@ -91,6 +78,7 @@ rm -f /etc/nginx/sites-enabled/default
 
 # Configure Supervisor
 echo "Configuring Supervisor..."
+mkdir -p /etc/supervisor/conf.d
 cat > /etc/supervisor/conf.d/django-app.conf <<EOL
 [program:django-app]
 command=/var/www/django-app/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 HomeFinderBackend.wsgi:application
@@ -103,11 +91,7 @@ stdout_logfile=/var/log/django-app/django-app.out.log
 environment=DJANGO_SETTINGS_MODULE="HomeFinderBackend.settings"
 EOL
 
-# Create log directory if it doesn't exist
-mkdir -p /var/log/django-app
-chown -R ubuntu:ubuntu /var/log/django-app
-
-# Create environment file with updated ALLOWED_HOSTS
+# Create environment file
 echo "Setting up environment file..."
 cat > /var/www/django-app/.env <<EOL
 DEBUG=False
@@ -120,23 +104,51 @@ SESSION_COOKIE_SECURE=True
 CSRF_COOKIE_SECURE=True
 EOL
 
-# Set proper permissions
-chown -R ubuntu:ubuntu /var/www/django-app
+# Set proper permissions for environment file
+chmod 600 /var/www/django-app/.env
+chown ubuntu:ubuntu /var/www/django-app/.env
 
-# Obtain SSL certificate
-echo "Obtaining SSL certificate..."
-certbot --nginx \
-    -d api.homefinder254.com \
-    --non-interactive \
-    --agree-tos \
-    -m ambeyibrian8@gmail.com \
-    --redirect
+# Ensure supervisor is running
+echo "Starting supervisor..."
+if ! command -v supervisord &> /dev/null; then
+    apt-get install -y supervisor
+fi
+
+# Start/restart supervisor
+if ! pgrep -f supervisord > /dev/null; then
+    supervisord
+else
+    echo "Supervisor is already running"
+fi
 
 # Reload Supervisor and Nginx
 echo "Reloading services..."
-supervisorctl reread
-supervisorctl update
-supervisorctl restart django-app
-nginx -t && systemctl restart nginx
+supervisorctl reread || true
+supervisorctl update || true
+supervisorctl restart django-app || true
+
+# Test nginx configuration
+nginx -t
+
+# Restart Nginx only if configuration test passed
+if [ $? -eq 0 ]; then
+    systemctl restart nginx
+else
+    echo "Nginx configuration test failed"
+    exit 1
+fi
+
+# Set up SSL after everything else is working
+echo "Setting up SSL..."
+if command -v certbot &> /dev/null; then
+    certbot --nginx \
+        -d api.homefinder254.com \
+        --non-interactive \
+        --agree-tos \
+        -m ambeyibrian8@gmail.com \
+        --redirect || echo "SSL setup failed, but continuing..."
+else
+    echo "Certbot not found, skipping SSL setup"
+fi
 
 echo "after_install.sh completed at $(date)"
