@@ -103,20 +103,10 @@ class PropertyImageCreateView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         try:
-            # Save the image with the current user
             serializer.save()
-            print(serializer.data)
         except Exception as e:
             raise ValidationError(f"Error creating property image: {str(e)}")
 
-    def create(self, request, *args, **kwargs):
-        try:
-            return super().create(request, *args, **kwargs)
-        except ValidationError as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
 
 class PropertyImageDeleteView(generics.DestroyAPIView):

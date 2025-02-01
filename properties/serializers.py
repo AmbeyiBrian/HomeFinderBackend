@@ -7,7 +7,7 @@ from users.serializers import UserSerializer
 class PropertyImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = PropertyImage
-        fields = ['property', 'image', 'is_primary','id']
+        fields = ['property', 'image', 'is_primary']
 
 class PropertyTypeSerializer(serializers.ModelSerializer):
     class Meta:

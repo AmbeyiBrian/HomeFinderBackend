@@ -66,7 +66,7 @@ class TokenObtainPairWithUserDetailsView(TokenObtainPairView):
             'first_name': user.first_name,
             'last_name': user.last_name,
             'phone_number': user.phone_number,
-            'profile_picture': server_address + user.profile_picture.url if user.profile_picture else None,
+            'profile_picture': user.profile_picture.url if user.profile_picture else None,
             'id': user.id,
         }
 
