@@ -4,7 +4,6 @@ env:
   variables:
     DJANGO_SECRET_KEY: "django-insecure-dyvx9d9m-h83zvn^vzy_5-@_@l5c^xf)9lucs6!px7_=5$6+86"
     AWS_STORAGE_BUCKET_NAME: django-app-storage
-    DEFAULT_FILE_STORAGE: storages.backends.s3boto3.S3Boto3Storage
     PYTHONPATH: /codebuild/output/src1579115079/src
 
 phases:
@@ -37,7 +36,7 @@ phases:
       - |
         cat > test_settings.py << EOL
         from HomeFinderBackend.settings import *
-        
+
         # Use SQLite for tests
         DATABASES = {
             'default': {
@@ -45,13 +44,31 @@ phases:
                 'NAME': ':memory:',
             }
         }
-        
+
+        # Storage Configuration
+        STORAGES = {
+            "default": {
+                "BACKEND": "django.core.files.storage.FileSystemStorage",
+                "OPTIONS": {
+                    "location": "test_media/",
+                    "base_url": "/media/",
+                },
+            },
+            "staticfiles": {
+                "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+            },
+        }
+
+        # Media/Static files
+        MEDIA_URL = '/media/'
+        MEDIA_ROOT = 'test_media/'
+        STATIC_URL = '/static/'
+        STATIC_ROOT = 'test_static/'
+
         # Disable external services during tests
         SENTRY_DSN = None
-        DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-        MEDIA_ROOT = 'test_media/'
         EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-        
+
         # Configure test specific settings
         CELERY_TASK_ALWAYS_EAGER = True
         CELERY_TASK_EAGER_PROPAGATES = True
