@@ -16,7 +16,7 @@ env:
 phases:
   install:
     runtime-versions:
-      python: 3.12
+      python: 3.10
     commands:
       # Update system and install dependencies
       - yum update -y
