@@ -103,11 +103,11 @@ WSGI_APPLICATION = 'HomeFinderBackend.wsgi.application'
 # Database Configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'homefinderdb.c4ukz2wlcu6n.us-east-1.rds.amazonaws.com',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
+        'HOST': 'homefinderdb.c4ukz2wlcu6n.us-east-1.rds.amazonaws.com',
         'PORT': os.getenv('DB_PORT', '5432'),
         'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE', '60')),
         'OPTIONS': {
