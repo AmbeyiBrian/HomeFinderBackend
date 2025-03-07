@@ -175,7 +175,7 @@ STORAGES = {
 }
 
 # Media files configuration
-MEDIA_URL = f"https://{STORAGES['default']['OPTIONS']['custom_domain']}/media/"
+MEDIA_URL = f"https://{os.getenv('AWS_STORAGE_BUCKET_NAME')}.s3.{os.getenv('AWS_S3_REGION_NAME', 'us-east-1')}.amazonaws.com/media/"
 MEDIA_ROOT = "media/"
 
 # Static files configuration
