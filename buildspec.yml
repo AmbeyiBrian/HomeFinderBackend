@@ -21,7 +21,6 @@ phases:
       # Update system and install dependencies
       - yum update -y
       - yum groupinstall -y "Development Tools"
-      - yum install -y openssl-devel bzip2-devel libffi-devel wget sqlite-devel
 
   pre_build:
     commands:
