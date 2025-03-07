@@ -5,75 +5,100 @@ set -e
 exec > >(tee -a /var/log/deploy.log) 2>&1
 echo "Starting validate_service.sh at $(date)"
 
-# Check if Nginx is running
-echo "Checking Nginx status..."
-if ! systemctl is-active --quiet nginx; then
-    echo "Nginx is not running"
-    exit 1
-fi
+# Function to check service status
+check_service() {
+    local service=$1
+    if ! systemctl is-active --quiet $service; then
+        echo "$service is not running"
+        return 1
+    fi
+    return 0
+}
 
-# Wait for application to start
-echo "Waiting for application to start..."
-sleep 10
+# Check if services are running
+echo "Validating services..."
+services=("nginx" "supervisor")
+for service in "${services[@]}"; do
+    if ! check_service $service; then
+        echo "Service validation failed"
+        exit 1
+    fi
+done
 
 # Check if application is responding
-echo "Checking application response..."
-if ! curl -s http://localhost > /dev/null; then
-    echo "Application is not responding"
+echo "Checking application health..."
+max_retries=5
+retry_count=0
+while [ $retry_count -lt $max_retries ]; do
+    if curl -sf http://localhost:8000/health/ > /dev/null; then
+        echo "Application is healthy"
+        break
+    else
+        echo "Health check failed, attempt $((retry_count + 1)) of $max_retries"
+        retry_count=$((retry_count + 1))
+        if [ $retry_count -eq $max_retries ]; then
+            echo "Application health check failed after $max_retries attempts"
+            exit 1
+        fi
+        sleep 5
+    fi
+done
+
+# Check if static files are accessible
+echo "Checking static files..."
+if ! curl -sf http://localhost/static/admin/css/base.css > /dev/null; then
+    echo "Static files are not accessible"
     exit 1
 fi
 
-echo "Application deployment validated successfully"
-echo "validate_service.sh completed at $(date)"
-
-echo "Verifying environment variables..."
-if [ -f /var/www/django-app/.env ]; then
-    echo ".env file exists"
-    # Print first character of sensitive values to verify they're set
-    echo "AWS_STORAGE_BUCKET_NAME is set: ${AWS_STORAGE_BUCKET_NAME:0:1}*****"
-    echo "AWS_S3_REGION_NAME is set: ${AWS_S3_REGION_NAME}"
-    echo "AWS_ACCESS_KEY_ID is set: ${AWS_ACCESS_KEY_ID:0:1}*****"
-    echo "AWS_SECRET_ACCESS_KEY is set: ${AWS_SECRET_ACCESS_KEY:0:1}*****"
-else
-    echo ".env file is missing!"
+# Check PostgreSQL connection
+echo "Checking database connection..."
+if ! sudo -u ubuntu /var/www/django-app/venv/bin/python -c "
+import psycopg2
+import os
+try:
+    conn = psycopg2.connect(
+        dbname=os.getenv('DB_NAME'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD'),
+        host=os.getenv('DB_HOST'),
+        port=os.getenv('DB_PORT', '5432')
+    )
+    conn.close()
+    print('Database connection successful')
+except Exception as e:
+    print(f'Database connection failed: {e}')
+    exit(1)
+"; then
+    echo "Database validation failed"
     exit 1
 fi
 
-# Check if gunicorn is running
-if ! pgrep -f "gunicorn"; then
-    echo "ERROR: Gunicorn is not running"
+# Check disk space
+echo "Checking disk space..."
+df -h / | awk 'NR==2 {print $5}' | cut -d'%' -f1 | (read used
+    if [ $used -gt 90 ]; then
+        echo "Warning: Disk space usage is above 90%"
+        exit 1
+    fi
+)
+
+# Check memory usage
+echo "Checking memory usage..."
+free | awk '/Mem:/ {print $3/$2 * 100.0}' | (read used
+    if [ ${used%.*} -gt 90 ]; then
+        echo "Warning: Memory usage is above 90%"
+        exit 1
+    fi
+)
+
+# Check application logs for errors
+echo "Checking application logs for errors..."
+if grep -i "error\|exception\|failed" /var/log/django-app/django-app.err.log &> /dev/null; then
+    echo "Found errors in application logs"
+    tail -n 10 /var/log/django-app/django-app.err.log
     exit 1
 fi
 
-# Check if celery worker is running
-if ! pgrep -f "celery.*worker"; then
-    echo "ERROR: Celery worker is not running"
-    exit 1
-fi
-
-# Check if celery beat is running
-if ! pgrep -f "celery.*beat"; then
-    echo "ERROR: Celery beat is not running"
-    exit 1
-fi
-
-# Check Redis connection
-if ! redis-cli ping; then
-    echo "ERROR: Redis is not responding"
-    exit 1
-fi
-
-# Check database connection using Django
-if ! python manage.py dbshell <<< '\q'; then
-    echo "ERROR: Database connection failed"
-    exit 1
-fi
-
-# Check API health endpoint
-if ! curl -f http://localhost:8000/health/; then
-    echo "ERROR: API health check failed"
-    exit 1
-fi
-
-echo "All services are running correctly"
+echo "All validation checks passed successfully at $(date)"
 exit 0

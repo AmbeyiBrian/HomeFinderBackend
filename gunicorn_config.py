@@ -2,36 +2,37 @@ import multiprocessing
 import os
 
 # Server socket
-bind = os.getenv('GUNICORN_BIND', '127.0.0.1:8000')
+bind = '127.0.0.1:8000'
 backlog = 2048
 
 # Worker processes - (2 x num_cores) + 1
-workers = int(os.getenv('GUNICORN_WORKERS', multiprocessing.cpu_count() * 2 + 1))
-worker_class = 'uvicorn.workers.UvicornWorker'
+workers = multiprocessing.cpu_count() * 2 + 1
+threads = 2
+worker_class = 'sync'
 worker_connections = 1000
 timeout = 120  # Increased for long-running processes
 keepalive = 5
 
 # Process naming
-proc_name = 'homefinder'
+proc_name = 'homefinder_gunicorn'
 pythonpath = '.'
 
 # Logging
-accesslog = os.getenv('GUNICORN_ACCESS_LOG', 'logs/gunicorn-access.log')
-errorlog = os.getenv('GUNICORN_ERROR_LOG', 'logs/gunicorn-error.log')
-loglevel = os.getenv('GUNICORN_LOG_LEVEL', 'info')
+accesslog = '/var/log/django-app/gunicorn-access.log'
+errorlog = '/var/log/django-app/gunicorn-error.log'
+loglevel = 'info'
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(L)s'
 
 # Process management
 daemon = False
-pidfile = 'run/gunicorn.pid'
+pidfile = '/var/run/gunicorn/homefinder.pid'
 umask = 0
 user = None
 group = None
 tmp_upload_dir = None
 
 # Server mechanics
-preload_app = False  # Set to False to prevent memory leaks
+preload_app = True
 max_requests = 1000
 max_requests_jitter = 50
 graceful_timeout = 30
@@ -44,7 +45,7 @@ certfile = None
 # Server hooks
 def on_starting(server):
     """Log when server starts"""
-    server.log.info("Starting HomeFinder server")
+    server.log.info("Starting Gunicorn server for HomeFinder")
 
 def on_reload(server):
     """Log when server reloads"""

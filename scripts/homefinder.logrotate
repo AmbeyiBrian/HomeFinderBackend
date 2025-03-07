@@ -12,3 +12,18 @@
         supervisorctl signal HUP homefinder:*
     endscript
 }
+
+/var/log/django-app/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    missingok
+    create 0640 ubuntu ubuntu
+    sharedscripts
+    postrotate
+        systemctl reload nginx
+        supervisorctl restart django-app
+    endscript
+}
