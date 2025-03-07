@@ -5,6 +5,3 @@ class UsersConfig(AppConfig):
     name = 'users'
     label = 'users'
 
-    def ready(self):
-        import users.signals  # Import signals when app is ready
-
