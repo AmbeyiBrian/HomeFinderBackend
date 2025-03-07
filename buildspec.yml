@@ -2,9 +2,10 @@ version: 0.2
 
 env:
   variables:
-    DJANGO_SECRET_KEY: q3RrMGfh1m2J64wVptGx9WzshlKd8YVyb9TjP9Kc3wJzKgfJ5q
+    DJANGO_SECRET_KEY: "django-insecure-dyvx9d9m-h83zvn^vzy_5-@_@l5c^xf)9lucs6!px7_=5$6+86"
     AWS_STORAGE_BUCKET_NAME: django-app-storage
     DEFAULT_FILE_STORAGE: storages.backends.s3boto3.S3Boto3Storage
+    PYTHONPATH: /codebuild/output/src1579115079/src
 
 phases:
   install:
@@ -32,36 +33,47 @@ phases:
     commands:
       - python3.10 -m pip install -r requirements.txt
 
-      # Create a temporary settings file for tests
+      # Create test settings file
       - |
         cat > test_settings.py << EOL
         from HomeFinderBackend.settings import *
         
+        # Use SQLite for tests
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': 'test_db.sqlite3',
+                'NAME': ':memory:',
             }
         }
         
-        CORS_ALLOWED_ORIGINS = [
-            "https://100.26.178.134",
-            "https://homefinder-env.eba-e72ydma9.us-east-1.elasticbeanstalk.com"
-        ]
+        # Disable external services during tests
+        SENTRY_DSN = None
+        DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+        MEDIA_ROOT = 'test_media/'
+        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+        
+        # Configure test specific settings
+        CELERY_TASK_ALWAYS_EAGER = True
+        CELERY_TASK_EAGER_PROPAGATES = True
+        PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
         EOL
 
-      # Export the test settings
+      # Export test settings
       - export DJANGO_SETTINGS_MODULE=test_settings
 
-      # Run migrations and tests
+      # Run migrations
       - python3.10 manage.py migrate --noinput
+
+      # Run tests with coverage
       - echo "Running tests"
-      - python3.10 manage.py test
+      - python3.10 -m coverage run --source='.' manage.py test properties users reviews payments chatbot --verbosity=2
 
   build:
     commands:
       - echo "Running collectstatic"
       - python3.10 manage.py collectstatic --noinput
+      - echo "Running coverage report"
+      - python3.10 -m coverage report
       - echo "Running migrations check"
       - python3.10 manage.py check --deploy
 
