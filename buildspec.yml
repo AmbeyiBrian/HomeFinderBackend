@@ -23,9 +23,6 @@ phases:
       - yum groupinstall -y "Development Tools"
       - yum install -y openssl-devel bzip2-devel libffi-devel wget sqlite-devel postgresql postgresql-devel
 
-      # Update pip and install build tools
-      - python -m pip install --upgrade pip wheel setuptools
-
   pre_build:
     commands:
       # Install project dependencies
