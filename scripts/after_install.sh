@@ -219,4 +219,5 @@ else
     echo "Certbot not found, skipping SSL setup"
 fi
 
+
 echo "after_install.sh completed successfully at $(date)"
