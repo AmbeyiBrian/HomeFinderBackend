@@ -5,8 +5,8 @@ from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from unittest.mock import patch, MagicMock
 from properties.models import Property, PropertyType, Reservation
-from .models import MpesaTransaction
-from .mpesa_utils import MpesaGateway
+from payments.models import MpesaTransaction
+from payments.mpesa_utils import MpesaGateway
 import json
 
 User = get_user_model()
@@ -142,3 +142,24 @@ class MpesaPaymentTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('detail', response.data)
         self.assertIn('already in progress', response.data['detail'])
+
+class MpesaTransactionTests(TestCase):
+    def setUp(self):
+        self.User = get_user_model()
+        self.user = self.User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpassword'
+        )
+
+    def test_mpesa_transaction_creation(self):
+        transaction = MpesaTransaction.objects.create(
+            user=self.user,
+            phone_number='254712345678',
+            amount=1000,
+            reference='TEST123',
+            description='Test payment'
+        )
+        self.assertEqual(str(transaction), 'TEST123')
+        self.assertEqual(transaction.user, self.user)
+        self.assertEqual(transaction.amount, 1000)

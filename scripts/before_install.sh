@@ -16,9 +16,30 @@ mkdir -p /var/log/django-app
 chown -R ubuntu:ubuntu /var/www/django-app
 chmod -R 755 /var/www/django-app
 
+# Add deadsnakes PPA for Python 3.12
+echo "Adding Python 3.12 repository..."
+add-apt-repository -y ppa:deadsnakes/ppa || {
+    echo "Failed to add Python PPA"
+    exit 1
+}
+
 # Install system dependencies
 echo "Installing system dependencies..."
-apt-get update
-apt-get install -y python3.10 python3.10-venv python3-pip nginx supervisor
+apt-get update || {
+    echo "Failed to update package list"
+    exit 1
+}
 
-echo "before_install.sh completed at $(date)"
+# Install Python 3.12 and other dependencies
+apt-get install -y python3.12 python3.12-venv python3.12-dev python3-pip nginx supervisor postgresql postgresql-contrib libpq-dev || {
+    echo "Failed to install required packages"
+    exit 1
+}
+
+# Verify Python installation
+python3.12 --version || {
+    echo "Python 3.12 installation failed"
+    exit 1
+}
+
+echo "before_install.sh completed successfully at $(date)"

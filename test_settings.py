@@ -13,8 +13,61 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# Application definition - import from main settings
-from HomeFinderBackend.settings import INSTALLED_APPS, MIDDLEWARE, ROOT_URLCONF, TEMPLATES, AUTH_USER_MODEL, REST_FRAMEWORK
+# Application definition
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'storages',
+
+    # Third-party apps
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'corsheaders',
+    'drf_yasg',
+    'django_filters',
+    'django_celery_beat',
+
+    # Local apps
+    'users.apps.UsersConfig',
+    'properties.apps.PropertiesConfig',
+    'reviews.apps.ReviewsConfig',
+    'payments.apps.PaymentsConfig',
+    'chatbot.apps.ChatbotConfig',
+]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+ROOT_URLCONF = 'HomeFinderBackend.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 # Use SQLite for tests
 DATABASES = {
@@ -24,12 +77,12 @@ DATABASES = {
     }
 }
 
-# Storage Configuration - Use local file system for tests
+# Storage Configuration
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
         "OPTIONS": {
-            "location": os.path.join(BASE_DIR, 'test_media'),
+            "location": "test_media/",
             "base_url": "/media/",
         },
     },
@@ -40,9 +93,22 @@ STORAGES = {
 
 # Media/Static files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'test_media')
+MEDIA_ROOT = 'test_media/'
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'test_static')
+STATIC_ROOT = 'test_static/'
+
+# Authentication
+AUTH_USER_MODEL = 'users.CustomUser'
+
+# Rest Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+}
 
 # Disable external services during tests
 SENTRY_DSN = None
@@ -58,3 +124,43 @@ USE_TZ = True
 USE_L10N = True
 USE_I18N = True
 TIME_ZONE = 'UTC'
+
+# Test logging settings
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'properties': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'users': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'reviews': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'payments': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'chatbot': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    }
+}
+
+# Set TEST_RUNNER to get more verbose output
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
