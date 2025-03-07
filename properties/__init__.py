@@ -1,1 +1,1 @@
-from properties.models import PropertyType, PropertyImage, Property, Favorite, Reservation
+default_app_config = 'properties.apps.PropertiesConfig'
