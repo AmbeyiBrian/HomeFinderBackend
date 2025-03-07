@@ -1,0 +1,14 @@
+/var/log/homefinder/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    missingok
+    create 0640 www-data www-data
+    sharedscripts
+    postrotate
+        systemctl reload homefinder
+        supervisorctl signal HUP homefinder:*
+    endscript
+}

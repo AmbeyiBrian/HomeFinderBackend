@@ -1,0 +1,75 @@
+version: 0.2
+
+env:
+  variables:
+    DJANGO_SECRET_KEY: q3RrMGfh1m2J64wVptGx9WzshlKd8YVyb9TjP9Kc3wJzKgfJ5q
+    AWS_STORAGE_BUCKET_NAME: django-app-storage
+    DEFAULT_FILE_STORAGE: storages.backends.s3boto3.S3Boto3Storage
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      # Install dependencies required for Python 3.10
+      - yum update -y
+      - yum groupinstall -y "Development Tools"
+      - yum install -y openssl-devel bzip2-devel libffi-devel wget sqlite-devel
+
+      # Download and install Python 3.10
+      - wget https://www.python.org/ftp/python/3.10.1/Python-3.10.1.tgz
+      - tar xzf Python-3.10.1.tgz
+      - cd Python-3.10.1
+      - ./configure --enable-optimizations
+      - make altinstall
+      - cd ..
+      - rm -rf Python-3.10.1 Python-3.10.1.tgz
+
+      # Update pip
+      - python3.10 -m pip install --upgrade pip
+
+  pre_build:
+    commands:
+      - python3.10 -m pip install -r requirements.txt
+
+      # Create a temporary settings file for tests
+      - |
+        cat > test_settings.py << EOL
+        from HomeFinderBackend.settings import *
+        
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': 'test_db.sqlite3',
+            }
+        }
+        
+        CORS_ALLOWED_ORIGINS = [
+            "https://100.26.178.134",
+            "https://homefinder-env.eba-e72ydma9.us-east-1.elasticbeanstalk.com"
+        ]
+        EOL
+
+      # Export the test settings
+      - export DJANGO_SETTINGS_MODULE=test_settings
+
+      # Run migrations and tests
+      - python3.10 manage.py migrate --noinput
+      - echo "Running tests"
+      - python3.10 manage.py test
+
+  build:
+    commands:
+      - echo "Running collectstatic"
+      - python3.10 manage.py collectstatic --noinput
+      - echo "Running migrations check"
+      - python3.10 manage.py check --deploy
+
+  post_build:
+    commands:
+      - echo "Build completed"
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: '.'

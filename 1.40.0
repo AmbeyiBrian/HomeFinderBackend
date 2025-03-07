@@ -1,0 +1,7 @@
+Collecting sentry-sdk
+  Downloading sentry_sdk-2.22.0-py2.py3-none-any.whl.metadata (10 kB)
+Requirement already satisfied: urllib3>=1.26.11 in c:\users\brian.ambeyi\pycharmprojects\homefinder\homefinder\lib\site-packages (from sentry-sdk) (1.26.20)
+Requirement already satisfied: certifi in c:\users\brian.ambeyi\pycharmprojects\homefinder\homefinder\lib\site-packages (from sentry-sdk) (2024.12.14)
+Downloading sentry_sdk-2.22.0-py2.py3-none-any.whl (325 kB)
+Installing collected packages: sentry-sdk
+Successfully installed sentry-sdk-2.22.0

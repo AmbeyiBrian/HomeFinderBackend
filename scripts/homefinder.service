@@ -1,0 +1,30 @@
+[Unit]
+Description=HomeFinder Django Application
+After=network.target postgresql.service redis-server.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+RuntimeDirectory=homefinder
+WorkingDirectory=/var/www/homefinder
+EnvironmentFile=/var/www/homefinder/.env.production
+ExecStart=/var/www/homefinder/scripts/start_production.sh
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+StandardOutput=append:/var/log/homefinder/app.log
+StandardError=append:/var/log/homefinder/error.log
+
+# Restart settings
+Restart=always
+RestartSec=5
+
+# Security settings
+PrivateTmp=true
+ProtectSystem=full
+NoNewPrivileges=true
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
