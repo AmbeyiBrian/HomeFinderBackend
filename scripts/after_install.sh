@@ -69,7 +69,6 @@ DB_PASSWORD=${DB_PASSWORD}
 DB_HOST=${DB_HOST}
 DB_PORT=${DB_PORT:-5432}
 EOL
-
 # Set proper permissions for environment file
 chmod 600 /var/www/django-app/.env
 chown ubuntu:ubuntu /var/www/django-app/.env
@@ -138,7 +137,6 @@ server {
     }
 }
 EOL
-
 # Enable the site and remove default
 ln -sf /etc/nginx/sites-available/django-app /etc/nginx/sites-enabled/ || {
     echo "Failed to enable Nginx site"
@@ -149,6 +147,7 @@ rm -f /etc/nginx/sites-enabled/default
 # Configure Supervisor with error handling
 echo "Configuring Supervisor..."
 mkdir -p /etc/supervisor/conf.d
+# shellcheck disable=SC1073
 cat > /etc/supervisor/conf.d/django-app.conf <<EOL || {
     echo "Failed to create Supervisor configuration"
     exit 1
@@ -163,7 +162,6 @@ stderr_logfile=/var/log/django-app/django-app.err.log
 stdout_logfile=/var/log/django-app/django-app.out.log
 environment=DJANGO_SETTINGS_MODULE="HomeFinderBackend.settings"
 EOL
-
 # Start/restart supervisor with error handling
 echo "Starting/restarting supervisor..."
 if ! command -v supervisord &> /dev/null; then
