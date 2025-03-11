@@ -31,14 +31,14 @@ apt-get update || {
 }
 
 # Install Python 3.12 and other dependencies
-apt-get install -y python3.12 python3.12-venv python3.12-dev python3-pip nginx supervisor postgresql postgresql-contrib libpq-dev || {
+apt-get install -y python3.10 python3.10-venv python3.10-dev python3-pip nginx supervisor postgresql postgresql-contrib libpq-dev || {
     echo "Failed to install required packages"
     exit 1
 }
 
 # Verify Python installation
 python3.12 --version || {
-    echo "Python 3.12 installation failed"
+    echo "Python 3.10 installation failed"
     exit 1
 }
 
