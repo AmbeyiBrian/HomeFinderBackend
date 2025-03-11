@@ -37,7 +37,7 @@ chmod -R 755 /var/www/django-app
 
 # Create and activate virtual environment
 echo "Setting up Python virtual environment..."
-sudo -u ubuntu python3.12 -m venv venv || {
+sudo -u ubuntu python3.10 -m venv venv || {
     echo "Failed to create virtual environment"
     exit 1
 }
@@ -218,4 +218,3 @@ else
 fi
 
 echo "after_install.sh completed successfully at $(date)"
-
