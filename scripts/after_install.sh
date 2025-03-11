@@ -66,7 +66,7 @@ ALLOWED_HOSTS=${ALLOWED_HOSTS:-'.homefinder254.com,localhost,127.0.0.1'}
 DB_NAME=${DB_NAME}
 DB_USER=${DB_USER}
 DB_PASSWORD=${DB_PASSWORD}
-DB_HOST=${DB_HOST}
+DB_HOST='homefinderdb.c4ukz2wlcu6n.us-east-1.rds.amazonaws.com'
 DB_PORT=${DB_PORT:-5432}
 EOL
 # Set proper permissions for environment file
