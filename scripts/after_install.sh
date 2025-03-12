@@ -54,21 +54,21 @@ sudo -u ubuntu /var/www/django-app/venv/bin/pip install -r requirements.txt || {
     exit 1
 }
 
-# Create environment file with error handling
-#echo "Setting up environment file..."
-#cat > /var/www/django-app/.env <<EOL || {
-#    echo "Failed to create .env file"
-#    exit 1
-#}
-#DJANGO_DEBUG=${DJANGO_DEBUG:-False}
-#CORS_ALLOW_ALL_ORIGINS=${CORS_ALLOW_ALL_ORIGINS:-False}
-#ALLOWED_HOSTS=${ALLOWED_HOSTS:-'.homefinder254.com,localhost,127.0.0.1'}
-#DB_NAME=${DB_NAME}
-#DB_USER=${DB_USER}
-#DB_PASSWORD=${DB_PASSWORD}
-#DB_HOST='homefinderdb.c4ukz2wlcu6n.us-east-1.rds.amazonaws.com'
-#DB_PORT=${DB_PORT:-5432}
-#EOL
+ Create environment file with error handling
+echo "Setting up environment file..."
+cat > /var/www/django-app/.env <<EOL || {
+    echo "Failed to create .env file"
+    exit 1
+}
+DJANGO_DEBUG=${DJANGO_DEBUG:-False}
+CORS_ALLOW_ALL_ORIGINS=${CORS_ALLOW_ALL_ORIGINS:-False}
+ALLOWED_HOSTS=${ALLOWED_HOSTS:-'.homefinder254.com,localhost,127.0.0.1'}
+DB_NAME=${DB_NAME}
+DB_USER=${DB_USER}
+DB_PASSWORD=${DB_PASSWORD}
+DB_HOST='homefinderdb.c4ukz2wlcu6n.us-east-1.rds.amazonaws.com'
+DB_PORT=${DB_PORT:-5432}
+EOL
 # Set proper permissions for environment file
 chmod 600 /var/www/django-app/.env
 chown ubuntu:ubuntu /var/www/django-app/.env
