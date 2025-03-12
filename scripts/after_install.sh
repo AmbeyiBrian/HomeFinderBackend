@@ -1,4 +1,5 @@
 #!/bin/bash
+# filepath: c:\Users\brian.ambeyi\PycharmProjects\HomeFinder\HomeFinderBackend\scripts\after_install.sh
 
 # Enable error handling
 set -e
@@ -56,10 +57,7 @@ sudo -u ubuntu /var/www/django-app/venv/bin/pip install -r requirements.txt || {
 
 # Create environment file with error handling
 echo "Setting up environment file..."
-cat > /var/www/django-app/.env <<EOL || {
-    echo "Failed to create .env file"
-    exit 1
-}
+cat > /var/www/django-app/.env << 'EOF'
 DJANGO_DEBUG=${DJANGO_DEBUG:-False}
 CORS_ALLOW_ALL_ORIGINS=${CORS_ALLOW_ALL_ORIGINS:-False}
 ALLOWED_HOSTS=${ALLOWED_HOSTS:-'.homefinder254.com,localhost,127.0.0.1'}
@@ -68,7 +66,8 @@ DB_USER=${DB_USER}
 DB_PASSWORD=${DB_PASSWORD}
 DB_HOST='homefinderdb.c4ukz2wlcu6n.us-east-1.rds.amazonaws.com'
 DB_PORT=${DB_PORT:-5432}
-EOL
+EOF
+
 # Set proper permissions for environment file
 chmod 600 /var/www/django-app/.env
 chown ubuntu:ubuntu /var/www/django-app/.env
@@ -102,10 +101,7 @@ chmod -R 755 /var/log/django-app
 
 # Configure Nginx
 echo "Configuring Nginx..."
-cat > /etc/nginx/sites-available/django-app <<EOL || {
-    echo "Failed to create Nginx configuration"
-    exit 1
-}
+cat > /etc/nginx/sites-available/django-app << 'EOF'
 server {
     listen 80;
     listen [::]:80;
@@ -127,16 +123,17 @@ server {
     
     location / {
         proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_connect_timeout 60s;
         proxy_read_timeout 60s;
         proxy_send_timeout 60s;
     }
 }
-EOL
+EOF
+
 # Enable the site and remove default
 ln -sf /etc/nginx/sites-available/django-app /etc/nginx/sites-enabled/ || {
     echo "Failed to enable Nginx site"
@@ -148,10 +145,7 @@ rm -f /etc/nginx/sites-enabled/default
 echo "Configuring Supervisor..."
 mkdir -p /etc/supervisor/conf.d
 
-cat > /etc/supervisor/conf.d/django-app.conf <<EOL || {
-    echo "Failed to create Supervisor configuration"
-    exit 1
-}
+cat > /etc/supervisor/conf.d/django-app.conf << 'EOF'
 [program:django-app]
 command=/var/www/django-app/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 HomeFinderBackend.wsgi:application --config /var/www/django-app/gunicorn_config.py
 directory=/var/www/django-app
@@ -161,7 +155,8 @@ autorestart=true
 stderr_logfile=/var/log/django-app/django-app.err.log
 stdout_logfile=/var/log/django-app/django-app.out.log
 environment=DJANGO_SETTINGS_MODULE="HomeFinderBackend.settings"
-EOL
+EOF
+
 # Start/restart supervisor with error handling
 echo "Starting/restarting supervisor..."
 if ! command -v supervisord &> /dev/null; then
