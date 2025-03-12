@@ -147,7 +147,7 @@ rm -f /etc/nginx/sites-enabled/default
 # Configure Supervisor with error handling
 echo "Configuring Supervisor..."
 mkdir -p /etc/supervisor/conf.d
-# shellcheck disable=SC1073
+
 cat > /etc/supervisor/conf.d/django-app.conf <<EOL || {
     echo "Failed to create Supervisor configuration"
     exit 1
