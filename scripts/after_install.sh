@@ -54,7 +54,7 @@ sudo -u ubuntu /var/www/django-app/venv/bin/pip install -r requirements.txt || {
     exit 1
 }
 
- Create environment file with error handling
+Create environment file with error handling
 echo "Setting up environment file..."
 cat > /var/www/django-app/.env <<EOL || {
     echo "Failed to create .env file"
